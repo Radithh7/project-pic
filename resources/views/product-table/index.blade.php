@@ -46,8 +46,11 @@
 </head>
 <body>
     <div class="table-container">
-        <h3 class="text-center">Table #06</h3>
+        <h3 class="text-center">Table Produk</h3>
         <p class="text-center">Product List</p>
+        <div class="card-body">
+            <a href="{{ route('dashboard.create') }}" class="btn btn-md btn-success mb-3"><i class="bi bi-plus-circle m-1"></i>TAMBAH PRODUK</a>
+            <a href="{{ route('category-product.index') }}" class="btn btn-md btn-success mb-3"><i class="bi bi-table m-1"></i>KATEGORI</a>
         <table class="table">
             <thead>
                 <tr>
@@ -80,6 +83,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
 </body>
 </html>
