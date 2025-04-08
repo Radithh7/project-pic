@@ -17,4 +17,9 @@ class HomeController extends Controller
         $product = Product::findOrFail($id);
         return view('homepage.detail', compact('product'));
     }
+    public function showcategory(string $id)
+    {
+        $product = Product::findOrFail($id);
+        return view('homepage.detail', compact('product'));
+    }
 }
