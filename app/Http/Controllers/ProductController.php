@@ -59,6 +59,18 @@ class ProductController extends Controller
         return view('product-table.detail');
     }
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $products = Product::where('nameproduct', 'like', "%$query%")->get();
+
+        return view('homepage.index', [  // ganti sesuai view kamu
+            'products' => $products,
+            'query' => $query
+        ]);
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -74,8 +86,6 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        dd($request->hasFile('image'), $request->file('image'));
-
         $validatedData = $request->validate([
             'nameproduct'   => 'required|min:5',
             'categories_id' => 'required|numeric',
@@ -87,22 +97,22 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
 
+        // Hapus gambar lama jika ada gambar baru diunggah
         if ($request->hasFile('image')) {
-            // hapus gambar lama (pastikan path-nya benar)
             if ($product->image && Storage::exists('public/' . $product->image)) {
-                Storage::delete('public/images' . $product->image);
+                Storage::delete('public/' . $product->image);
             }
 
-            // simpan gambar baru
             $validatedData['image'] = $request->file('image')->store('images', 'public');
+        } else {
+            // Jangan update field image jika tidak ada file baru
+            unset($validatedData['image']);
         }
 
         $product->update($validatedData);
 
         return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Diperbarui!']);
     }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -111,13 +121,13 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        //delete image
-        Storage::delete('public/images/' . $product->image);
+        // Hapus gambar dari storage
+        if ($product->image && Storage::exists('public/' . $product->image)) {
+            Storage::delete('public/' . $product->image);
+        }
 
-        //delete product
         $product->delete();
 
-        //redirect to index
         return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 }
