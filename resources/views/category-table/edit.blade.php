@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <form action="{{ route('category-project.update', $product->id) }}" method="post" enctype="multipart/form-data">
+    <div class="container col-5 mt-5">
+        <form action="{{ route('category-product.update', $category->id) }}" method="post">
             @csrf
             @method('PUT')
             <div class="row justify-content-center">
@@ -18,7 +18,7 @@
                 <hr>
                 <div class="mb-3">
                     <label for="category_name" class="form-label">Nama Kategori</label>
-                    <input type="text" name="category_name" id="category_name" class="form-control" value="{{ $product->category_name }}" required>
+                    <input type="text" name="category_name" id="category_name" class="form-control" value="{{ $category->category_name }}" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Update Kategori</button>
             </div>

@@ -62,7 +62,7 @@
                             <a href="#" class="btn btn-outline-warning">
                                 <i class="bi bi-cart-plus me-1"></i> Keranjang
                             </a>
-                            <a href="#" class="btn btn-outline-primary">
+                            <a href="{{ route('transactions.create', ['product_id' => $product->id]) }}" class="btn btn-outline-primary">
                                 <i class="bi bi-money me-1"></i> Beli Sekarang
                             </a>
                         </div>

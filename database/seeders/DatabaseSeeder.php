@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,26 +17,23 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
+        User::create([
+            'name' => 'Admin Demo',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('admin1234'), // Jangan lupa bcrypt password!
+        ]);
 
         Category::create([
-            'category_name' => 'makanan'
+            'category_name' => 'Makanan'
         ]);
         Category::create([
-            'category_name' => 'minuman'
+            'category_name' => 'Minuman'
         ]);
         Category::create([
-            'category_name' => 'alat tulis'
+            'category_name' => 'Alat Tulis'
         ]);
         Category::create([
-            'category_name' => 'atribut sekolah'
-        ]);
-        Product::create([
-            'nameproduct' => 'zaki',
-            'categories_id' => 1,
-            'description' => 'zaki',
-            'stock' => 1,
-            'price' => 1000000,
-            'image' => 'zaki.png',
+            'category_name' => 'Atribut Sekolah'
         ]);
     }
 }

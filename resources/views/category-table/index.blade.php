@@ -40,15 +40,6 @@
         <h3 class="text-center">Table Kategori</h3>
         <p class="text-center">Category List</p>
 
-        <!-- Tombol Filter Kategori -->
-        <div class="mb-3 text-center category-buttons">
-            <a href="{{ route('category-product.index', ['category' => 'makanan']) }}" class="btn btn-success">Makanan</a>
-            <a href="{{ route('category-product.index', ['category' => 'minuman']) }}" class="btn btn-success">Minuman</a>
-            <a href="{{ route('category-product.index', ['category' => 'alat_tulis']) }}" class="btn btn-success">Alat Tulis</a>
-            <a href="{{ route('category-product.index', ['category' => 'atribut_sekolah']) }}" class="btn btn-success">Atribut Sekolah</a>
-            <a href="{{ route('category-product.index') }}" class="btn btn-dark">Semua</a>
-        </div>
-
         <div class="card-body">
             <a href="{{ route('category-product.create') }}" class="btn btn-md btn-success mb-3">
                 <i class="bi bi-plus-circle m-1"></i> TAMBAH KATEGORI

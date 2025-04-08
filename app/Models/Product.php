@@ -19,4 +19,10 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'categories_id');
     }
+    public function transactions()
+    {
+        return $this->belongsToMany(Transaction::class, 'transaction_items')
+            ->withPivot('quantity', 'price', 'subtotal')
+            ->withTimestamps();
+    }
 }
