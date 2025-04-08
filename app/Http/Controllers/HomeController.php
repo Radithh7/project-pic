@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 
 class HomeController extends Controller
 {
@@ -17,9 +18,9 @@ class HomeController extends Controller
         $product = Product::findOrFail($id);
         return view('homepage.detail', compact('product'));
     }
-    public function showcategory(string $id)
+    public function showCategoryWithProducts()
     {
-        $product = Product::findOrFail($id);
-        return view('homepage.detail', compact('product'));
+        $categories = Category::with('products')->get();
+        return view('homepage.by-category', compact('categories'));
     }
 }

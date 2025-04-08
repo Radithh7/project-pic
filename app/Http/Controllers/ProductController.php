@@ -74,34 +74,35 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        dd($request->hasFile('image'), $request->file('image'));
+
         $validatedData = $request->validate([
             'nameproduct'   => 'required|min:5',
             'categories_id' => 'required|numeric',
             'description'   => 'required|min:10',
             'price'         => 'required|numeric',
             'stock'         => 'required|numeric',
-            'image'         => 'required|image|mimes:jpeg,jpg,png|max:2048'
+            'image'         => 'nullable|image|mimes:jpeg,jpg,png|max:2048'
         ]);
 
         $product = Product::findOrFail($id);
 
         if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
-            if ($product->image && Storage::exists('public/images/' . $product->image)) {
-                Storage::delete('public/images/' . $product->image);
+            // hapus gambar lama (pastikan path-nya benar)
+            if ($product->image && Storage::exists('public/' . $product->image)) {
+                Storage::delete('public/images' . $product->image);
             }
-            // Simpan gambar baru
+
+            // simpan gambar baru
             $validatedData['image'] = $request->file('image')->store('images', 'public');
-        } else {
-            // Jika tidak ada gambar baru, jangan ubah field image
-            unset($validatedData['image']);
         }
 
-        // Update data produk
         $product->update($validatedData);
 
         return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Diperbarui!']);
     }
+
+
 
     /**
      * Remove the specified resource from storage.

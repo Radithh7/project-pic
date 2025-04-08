@@ -11,7 +11,7 @@
     <div class="jumbotron p-5 mb-4 text-white rounded-3" style="background: linear-gradient(135deg, #007bff, #6610f2);">
         <h1 class="display-4 fw-bold">Selamat Datang di SPW Online!</h1>
         <p class="lead">Temukan berbagai produk berkualitas dengan harga terbaik.</p>
-        <a href="{{ route('category-product.index') }}" class="btn btn-light btn-lg shadow">Jelajahi Kategori</a>
+        <a href="{{ route('product.showcategory') }}" class="btn btn-light btn-lg shadow">Jelajahi Kategori</a>
     </div>
 
     <div class="container">
