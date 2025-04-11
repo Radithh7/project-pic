@@ -4,61 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"></script>
     <style>
         body {
-            background: linear-gradient(to right, #111acb, #2575fc);
-            color: #fff;
+            font-family: sans-serif;
+            background-color: #f1f1f1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
-        .card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+        .login-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 350px;
         }
-        .form-control, .input-group-text {
-            background: rgba(255, 255, 255, 0.2);
-            color: #fff;
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: .5rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: .5rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: .7rem;
+            background-color: #3490dc;
+            color: white;
             border: none;
-        }
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-        .btn-warning {
-            background: #ffcc00;
-            color: #333;
+            border-radius: 5px;
             font-weight: bold;
+            cursor: pointer;
         }
-        a {
-            color: #ffcc00;
+        .form-group button:hover {
+            background-color: #2779bd;
+        }
+        .error {
+            color: red;
+            margin-bottom: 1rem;
+            text-align: center;
         }
     </style>
 </head>
-<body class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4 shadow-lg" style="width: 30rem;">
-        <h3 class="text-center fw-bold">LOG IN</h3>
-        <hr>
-        <form method="POST" action="{{ route('login') }}">
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+
+        @if ($errors->any())
+            <div class="error">
+                <ul style="list-style: none; padding-left: 0;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('auth.verify') }}">
             @csrf
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
-                </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" required autofocus>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-key"></i></span>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
-                </div>
+
+            <div class="form-group">
+                <label for="password">Kata Sandi</label>
+                <input type="password" name="password" id="password" required>
             </div>
-            <button type="submit" class="btn btn-warning w-100">Log in</button>
+
+            <div class="form-group">
+                <button type="submit">Masuk</button>
+            </div>
         </form>
-        <div class="text-center mt-3">
-            <a href="#">Register</a> | <a href="#">Forgot your password?</a>
-        </div>
     </div>
 </body>
 </html>

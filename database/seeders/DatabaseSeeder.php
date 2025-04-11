@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\Hash;
 
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -16,20 +17,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-        User::create([
-            'name' => 'Admin Demo',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('admin1234'),
-            'role' => 'admin', 
+        Product::create([
+            'nameproduct' => 'Zaki',
+            'categories_id' => '1',
+            'description' => 'Ini zaki',
+            'stock' => '100',
+            'price' => '10000',
+            'image' => 'zaki.png'
         ]);
-        User::create([
-            'name' => 'User Demo',
-            'email' => 'user@gmail.com',
-            'password' => bcrypt('user1234'),
-            'role' => 'user', 
-        ]);
-
         Category::create([
             'category_name' => 'Makanan'
         ]);
@@ -42,5 +37,19 @@ class DatabaseSeeder extends Seeder
         Category::create([
             'category_name' => 'Atribut Sekolah'
         ]);
+        User::create([
+            'name' => 'admin',
+            'email' => 'admin@gmail.com',
+            'role' => 'admin',
+            'password' => bcrypt('admin'),
+        ]);
+
+        User::create([
+            'name' => 'user',
+            'email' => 'user@gmail.com',
+            'role' => 'user',
+            'password' => bcrypt('user'),
+        ]);
+
     }
 }

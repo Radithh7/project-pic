@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @extends('layouts.dashboard')
 
 @section('title', 'Data Produk')
@@ -25,9 +26,9 @@
                     <td>{{ $product->stock }}</td>
                     <td>{{ "Rp " . number_format($product->price, 2, ',', '.') }}</td>
                     <td>
-                        <a href="{{ route('dashboard.show', $product->id) }}" class="btn btn-sm btn-dark"><i class="bi bi-eye"></i></a>
-                        <a href="{{ route('dashboard.edit', $product->id) }}" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
-                        <form action="{{ route('dashboard.destroy', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus?')">
+                        <a href="{{ route('admin.dashboard.show', $product->id) }}" class="btn btn-sm btn-dark"><i class="bi bi-eye"></i></a>
+                        <a href="{{ route('admin.dashboard.edit', $product->id) }}" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                        <form action="{{ route('admin.dashboard.destroy', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin hapus?')">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
                         </form>

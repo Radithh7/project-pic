@@ -41,7 +41,7 @@
 <body>
     <div class="sidebar">
         <h4 class="text-center mb-4">Dashboard</h4>
-        <a href="{{ route('dashboard.index') }}"><i class="bi bi-box-seam me-2"></i> Produk</a>
+        <a href="{{ route('admin.dashboard.index') }}"><i class="bi bi-box-seam me-2"></i> Produk</a>
         <a href="{{ route('category-product.index') }}"><i class="bi bi-tags me-2"></i> Kategori</a>
     </div>
 
