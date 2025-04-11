@@ -39,3 +39,5 @@ Route::middleware('guest')->group(function () {
 
 // Rute untuk logout (gunakan POST, lebih aman)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/checkout', [TransactionController::class, 'create'])->name('transactions.create');
