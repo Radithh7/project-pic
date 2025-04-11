@@ -54,10 +54,12 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        return view('product-table.detail');
+        $product = Product::with('category')->findOrFail($id);
+        return view('product-table.detail', compact('product'));
     }
+
 
     public function search(Request $request)
     {

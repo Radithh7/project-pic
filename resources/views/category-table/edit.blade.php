@@ -1,31 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Update - Produk</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-</head>
-<body>
-    <div class="container col-5 mt-5">
-        <form action="{{ route('category-product.update', $category->id) }}" method="post">
-            @csrf
-            @method('PUT')
-            <div class="row justify-content-center">
-                <h2 class="text-center my-3">Update Kategori</h2>
-                <hr>
-                <div class="mb-3">
-                    <label for="category_name" class="form-label">Nama Kategori</label>
-                    <input type="text" name="category_name" id="category_name" class="form-control" value="{{ $category->category_name }}" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Update Kategori</button>
-            </div>
-        </form>
-    </div>  
+@extends('layouts.dashboard')
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
-</body>
-</html>
+@section('title', 'Edit Kategori')
+
+@section('content')
+<hr>
+<div class="container col-md-6 mt-4">
+    <form action="{{ route('category-product.update', $category->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="mb-3">
+            <label for="category_name" class="form-label">Nama Kategori</label>
+            <input type="text" name="category_name" id="category_name" class="form-control" value="{{ $category->category_name }}" required>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Update Kategori</button>
+            <a href="{{ route('category-product.index') }}" class="btn btn-warning ms-2"><i class="bi bi-arrow-left"></i> Kembali</a>
+        </div>
+    </form>
+</div>
+@endsection
