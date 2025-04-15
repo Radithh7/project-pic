@@ -48,7 +48,7 @@ class ProductController extends Controller
 
         Product::create($validatedData);
 
-        return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('admin.dashboard.index')->with(['success' => 'Data Berhasil Disimpan!']);
     }
 
     /**
@@ -67,11 +67,14 @@ class ProductController extends Controller
 
         $products = Product::where('nameproduct', 'like', "%$query%")->get();
 
-        return view('homepage.index', [  // ganti sesuai view kamu
+        return view('homepage.index', [
             'products' => $products,
-            'query' => $query
+            'query' => $query,
+            'isSearch' => true 
         ]);
     }
+
+
 
     /**
      * Show the form for editing the specified resource.
@@ -113,7 +116,7 @@ class ProductController extends Controller
 
         $product->update($validatedData);
 
-        return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Diperbarui!']);
+        return redirect()->route('admin.dashboard.index')->with(['success' => 'Data Berhasil Diperbarui!']);
     }
 
     /**
@@ -130,7 +133,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        return redirect()->route('dashboard.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        return redirect()->route('admin.dashboard.index')->with(['success' => 'Data Berhasil Dihapus!']);
     }
 
 }

@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
+    public function index()
+    {
+        $transactions = Transaction::where('user_id', Auth::id())->orderBy('transaction_date', 'desc')->get();
+        return view('transactions.index', compact('transactions'));
+    }
+    
     public function create(Request $request)
     {
         $productId = $request->product_id;
@@ -33,7 +39,8 @@ class TransactionController extends Controller
             'products'         => 'required|array',
             'products.*'       => 'exists:products,id',
             'quantities'       => 'required|array',
-            'quantities.*'     => 'integer|min:1'
+            'quantities.*'     => 'integer|min:1',
+            'payment_method'   => 'required|string|in:cash,gopay,dana,ovo,shopeepay',  // Menambahkan validasi untuk payment_method
         ]);
 
         $total = 0;
@@ -59,13 +66,14 @@ class TransactionController extends Controller
             ];
         }
 
-        // Simpan transaksi utama
+        // Simpan transaksi utama dengan payment_method
         $transaction = Transaction::create([
             'transaction_date' => $request->transaction_date,
             'buyer_name'       => $request->buyer_name,
             'total'            => $total,
             'status'           => 'pending',
-            'user_id'          => Auth::id(), // FIX: ambil user id dengan benar
+            'user_id'          => Auth::id(),
+            'payment_method'   => $request->payment_method,  // Menyimpan payment_method
         ]);
 
         // Simpan detail item & kurangi stok
@@ -82,5 +90,12 @@ class TransactionController extends Controller
         }
 
         return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil ditambahkan!');
+    }
+    public function show(Transaction $transaction)
+    {
+        // Ambil data transaksi bersama dengan item transaksi terkait
+        $transaction->load('items.product'); // Memuat relasi dengan 'transaction_items' dan 'products'
+
+        return view('transactions.show', compact('transaction'));
     }
 }
