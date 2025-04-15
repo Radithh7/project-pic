@@ -50,10 +50,8 @@
                 </button>
             </form>
         </div>
-        <a href="{{ route('product.showcategory') }}" class="btn btn-light btn-lg fw-semibold shadow-sm mt-4">
-                Jelajahi Kategori
-        </a>
-    </div>
+        <a href="{{ route('product.showcategory') }}" class="btn btn-light btn-lg fw-semibold shadow-sm mt-4">Jelajahi Kategori</a>
+        </div>
 
     <!-- Produk Terbaru -->
     <div class="container">

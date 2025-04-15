@@ -20,6 +20,7 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response|JsonResponse
     {
+        $guards = empty($guards) ? ['web'] : $guards;
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
                 if ($guard === 'admin') {

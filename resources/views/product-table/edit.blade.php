@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mt-4">
-    <form action="{{ route('dashboard.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('admin.dashboard.update', $product->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <hr>
@@ -55,7 +55,7 @@
         </div>
 
         <button type="submit" class="btn btn-primary">Update Produk</button>
-        <a href="{{ route('dashboard.index') }}" class="btn btn-warning">
+        <a href="{{ route('admin.dashboard.index') }}" class="btn btn-warning">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </form>

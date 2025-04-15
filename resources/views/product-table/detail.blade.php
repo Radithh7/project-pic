@@ -17,7 +17,7 @@
                     @if ($product->description)
                         <p class="card-text"><strong>Deskripsi:</strong> {{ $product->description }}</p>
                     @endif
-                    <a href="{{ route('dashboard.index') }}" class="btn btn-warning mt-3"><i class="bi bi-arrow-left"></i> Kembali</a>
+                    <a href="{{ route('admin.dashboard.index') }}" class="btn btn-warning mt-3"><i class="bi bi-arrow-left"></i> Kembali</a>
                 </div>
             </div>
         </div>

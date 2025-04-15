@@ -6,8 +6,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\AuthController;
 
-//Homepage
-Route::group(['middleware'=>'auth:user'], function(){
+// Homepage untuk user yang sudah login
+Route::group(['middleware' => 'auth:user'], function() {
     Route::get('/', [HomeController::class, 'index'])->name('user.dashboard.index');
     Route::get('/search', [ProductController::class, 'search'])->name('product.search');
     Route::get('/product/{id}', [HomeController::class, 'show'])->name('product.show');
@@ -16,20 +16,26 @@ Route::group(['middleware'=>'auth:user'], function(){
     Route::post('/checkout', [TransactionController::class, 'store'])->name('transactions.store');
 });
 
-//Dashboard Admin
-Route::group(['middleware'=>'auth:admin'], function(){
+// Homepage untuk admin yang sudah login
+Route::group(['middleware' => 'auth:admin'], function() {
     Route::resource('/dashboard', ProductController::class)->names('admin.dashboard');
-    Route::get('/dashboard/create', [ProductController::class, 'create'])->name('dashboard.create');
-    
+    Route::post('/dashboard/create', [ProductController::class, 'create'])->name('dashboard.create');
     Route::resource('/category-product', \App\Http\Controllers\CategoryController::class);
 });
 
-//Beli
+// Beli
 Route::get('/checkout', [TransactionController::class, 'create'])->name('transactions.create');
 Route::post('/checkout', [TransactionController::class, 'store'])->name('transactions.store');
 
-//Login
-Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest:admin,user');
-Route::post('/login', [AuthController::class, 'verify'])->name('auth.verify');
+// Rute untuk guest (belum login)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'index'])->name('login')->middleware('guest:admin,user');
+    Route::post('/login', [AuthController::class, 'verify'])->name('auth.verify'); // Pastikan menggunakan verify untuk login
 
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Halaman Register
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+});
+
+// Rute untuk logout (gunakan POST, lebih aman)
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

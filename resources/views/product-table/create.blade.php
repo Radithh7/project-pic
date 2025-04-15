@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container mt-4">
-    <form action="{{ route('dashboard.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('dashboard.create') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <hr>
         <div class="row">
@@ -53,7 +53,7 @@
 
         <div class="mt-4">
             <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Tambah Produk</button>
-            <a href="{{ route('dashboard.index') }}" class="btn btn-warning ms-2"><i class="bi bi-arrow-left"></i> Kembali</a>
+            <a href="{{ route('admin.dashboard.index') }}" class="btn btn-warning ms-2"><i class="bi bi-arrow-left"></i> Kembali</a>
         </div>
     </form>
 </div>

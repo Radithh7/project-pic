@@ -4,7 +4,21 @@
 @section('title', 'Data Produk')
 
 @section('content')
-    <a href="{{ route('dashboard.create') }}" class="btn btn-success mb-3"><i class="bi bi-plus-circle m-1"></i>Tambah Produk</a>
+    <!-- Baris tombol: Tambah Produk di kiri, Logout di kanan -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Tombol Tambah Produk -->
+        <a href="{{ route('dashboard.create') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Produk
+        </a>
+
+        <!-- Tombol Logout -->
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="m-0">
+            @csrf
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-box-arrow-right me-1"></i> Logout
+            </button>
+        </form>
+    </div>
 
     <table class="table table-bordered bg-white">
         <thead class="table-success">
