@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('buyer_name');
+            $table->dateTime('transaction_date');
             $table->decimal('total', 10, 2);
+            $table->string('status')->default('pending');
+            $table->enum('payment_method', ['cash', 'gopay', 'dana', 'ovo', 'shopeepay'])->default('cash');
             $table->timestamps();
         });
     }

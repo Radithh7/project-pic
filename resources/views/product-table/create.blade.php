@@ -4,7 +4,8 @@
 
 @section('content')
 <div class="container mt-4">
-    <form action="{{ route('dashboard.create') }}" method="POST" enctype="multipart/form-data">
+
+    <form action="{{ route('admin.dashboard.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <hr>
         <div class="row">

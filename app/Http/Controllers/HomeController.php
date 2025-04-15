@@ -11,12 +11,54 @@ class HomeController extends Controller
     /**
      * Tampilkan halaman utama (homepage) dengan 6 produk terbaru
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::latest()->take(6)->get();
+        $query = $request->query('query');
 
-        // Pastikan view ini ada: resources/views/homepage/index.blade.php
-        return view('homepage.index', compact('products'));
+        $products = Product::when($query, function ($q) use ($query) {
+            $q->where('nameproduct', 'like', "%$query%");
+        })->latest()->take(6)->get();
+
+        // Ambil produk berdasarkan total pembelian (jumlah transaksi)
+        $bestSellers = Product::withCount('transactions')
+            ->orderBy('transactions_count', 'desc')
+            ->take(6)
+            ->get();
+
+        return view('homepage.index', compact('products', 'query', 'bestSellers'));
+    }
+
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $categories = Category::with('products')->get();
+
+        $products = Product::where('nameproduct', 'like', "%$query%")->get();
+
+        $bestSellers = Product::withCount('transactions')
+            ->orderBy('transactions_count', 'desc')
+            ->take(6)
+            ->get();
+
+        return view('homepage.by-category', [
+            'categories' => $categories,
+            'products' => $products,
+            'query' => $query,
+            'bestSellers' => $bestSellers
+        ]);
+    }
+
+
+
+    public function filterCategory($id)
+    {
+        $categories = Category::with('products')->get(); // untuk sidebar
+        $selectedCategory = Category::with('products')->findOrFail($id);
+        $products = $selectedCategory->products;
+
+        return view('homepage.by-category', compact('categories', 'products'));
     }
 
     /**
