@@ -20,7 +20,6 @@ Route::group(['middleware'=>'auth:user'], function(){
 Route::group(['middleware'=>'auth:admin'], function(){
     Route::resource('/dashboard', ProductController::class)->names('admin.dashboard');
     Route::get('/dashboard/create', [ProductController::class, 'create'])->name('dashboard.create');
-    
     Route::resource('/category-product', \App\Http\Controllers\CategoryController::class);
 });
 
