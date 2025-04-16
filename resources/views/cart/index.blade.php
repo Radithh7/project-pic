@@ -40,7 +40,7 @@
         <a class="navbar-brand fw-bold text-primary" href="{{ url('/') }}">SPW Online</a>
 
         <div class="d-flex align-items-center gap-3 ms-auto">
-            <a href="{{ route('product.showcategory') }}" class="btn btn-outline-secondary rounded-pill">Kembali Belanja</a>
+            <a href="{{ route('user.dashboard.index') }}" class="btn btn-outline-secondary rounded-pill">Kembali Belanja</a>
         </div>
     </div>
 </nav>

@@ -71,17 +71,30 @@
                             <i class="bi bi-arrow-left-circle me-1"></i> Kembali
                         </a>
 
-                        <form action="{{ route('cart.add') }}" method="POST">
+                        @if ($product->stock > 0)
+                        <form action="{{ route('cart.add') }}" method="POST" class="d-flex align-items-center gap-2">
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
-                            <button type="submit" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-cart-check me-1"></i> Keranjang
+                            <input type="number" name="quantity" min="1" max="{{ $product->stock }}" value="1" class="form-control form-control-sm" style="width: 70px;">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Keranjang</button>
+                        </form>
+
+                        <form action="{{ route('transactions.store') }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="transaction_date" value="{{ now()->toDateString() }}">
+                            <input type="hidden" name="buyer_name" value="{{ Auth::user()->name }}">
+                            <input type="hidden" name="products[]" value="{{ $product->id }}">
+                            <input type="hidden" name="quantities[]" value="1">
+                            <input type="hidden" name="payment_method" value="gopay">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-bag-check me-1"></i> Beli Sekarang
                             </button>
                         </form>
 
-                        <a href="{{ route('transactions.create', ['product_id' => $product->id]) }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-bag-check me-1"></i> Beli Sekarang
-                        </a>
+                        @else
+                            <button class="btn btn-secondary btn-sm" disabled>Stok Habis</button>
+                        @endif
+
                     </div>
 
                 </div>

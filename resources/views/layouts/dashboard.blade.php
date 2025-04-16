@@ -36,13 +36,14 @@
             min-height: 100vh;
         }
     </style>
-    @yield('head') {{-- Optional untuk tambahan CSS di halaman --}}
+    @yield('head')
 </head>
 <body>
     <div class="sidebar">
         <h4 class="text-center mb-4">Dashboard</h4>
         <a href="{{ route('admin.dashboard.index') }}"><i class="bi bi-box-seam me-2"></i> Produk</a>
         <a href="{{ route('category-product.index') }}"><i class="bi bi-tags me-2"></i> Kategori</a>
+        <a href="{{ route('admin.transactions') }}"><i class="bi bi-receipt me-2"></i> Transaksi</a>
     </div>
 
     <div class="content">
@@ -50,8 +51,7 @@
         @yield('content')
     </div>
 
-    {{-- Script dasar Bootstrap --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    @yield('scripts') {{-- Tambahan JS halaman --}}
+    @yield('scripts')
 </body>
 </html>

@@ -15,7 +15,7 @@
         <form id="logout-form" action="{{ route('logout') }}" method="POST" class="m-0">
             @csrf
             <button type="submit" class="btn btn-danger">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                <i class="bi bi-box-arrow-right m-1"></i>
             </button>
         </form>
     </div>
@@ -23,6 +23,7 @@
     <table class="table table-bordered bg-white">
         <thead class="table-success">
             <tr>
+                <th>ID</th>
                 <th>Gambar</th>
                 <th>Nama Produk</th>
                 <th>Kategori</th>
@@ -34,6 +35,7 @@
         <tbody>
             @foreach ($products as $product)
                 <tr>
+                    <td><strong/>{{ $product->id }}</td>
                     <td><img src="{{ asset('storage/'.$product->image) }}" style="width: 50px;"></td>
                     <td>{{ $product->nameproduct }}</td>
                     <td>{{ $product->category->category_name }}</td>

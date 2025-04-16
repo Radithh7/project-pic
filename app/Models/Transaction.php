@@ -25,4 +25,8 @@ class Transaction extends Model
             ->withPivot('quantity', 'price', 'subtotal')
             ->withTimestamps();
     }
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
 }

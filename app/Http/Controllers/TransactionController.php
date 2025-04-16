@@ -40,7 +40,7 @@ class TransactionController extends Controller
             'products.*'       => 'exists:products,id',
             'quantities'       => 'required|array',
             'quantities.*'     => 'integer|min:1',
-            'payment_method'   => 'required|string|in:cash,gopay,dana,ovo,shopeepay',  // Menambahkan validasi untuk payment_method
+            'payment_method'   => 'required|string|in:cash,gopay,dana,ovo,shopeepay',
         ]);
 
         $total = 0;
@@ -66,17 +66,40 @@ class TransactionController extends Controller
             ];
         }
 
-        // Simpan transaksi utama dengan payment_method
+        // Simpan transaksi utama
         $transaction = Transaction::create([
             'transaction_date' => $request->transaction_date,
             'buyer_name'       => $request->buyer_name,
             'total'            => $total,
             'status'           => 'pending',
             'user_id'          => Auth::id(),
-            'payment_method'   => $request->payment_method,  // Menyimpan payment_method
+            'payment_method'   => $request->payment_method,
         ]);
 
-        // Simpan detail item & kurangi stok
+        // Konfigurasi Midtrans
+        \Midtrans\Config::$serverKey = config('midtrans.serverKey');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        // Buat parameter transaksi untuk Midtrans
+        $params = [
+            'transaction_details' => [
+                'order_id' => 'TRX-' . time() . '-' . rand(100, 999),
+                'gross_amount' => $total,
+            ],
+            'customer_details' => [
+                'first_name' => Auth::user()->name,
+                'email' => Auth::user()->email,
+            ],
+        ];
+
+        // Dapatkan Snap Token
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $transaction->snap_token = $snapToken;
+        $transaction->save();
+
+        // Simpan item transaksi & update stok
         foreach ($items as $item) {
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
@@ -89,13 +112,35 @@ class TransactionController extends Controller
             Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
         }
 
-        return redirect()->route('transactions.index')->with('success', 'Transaksi berhasil ditambahkan!');
+        // Tampilkan halaman pembayaran Midtrans
+        return view('transactions.payment', [
+            'transaction' => $transaction,
+            'snapToken'   => $snapToken
+        ]);
     }
+
     public function show(Transaction $transaction)
     {
         // Ambil data transaksi bersama dengan item transaksi terkait
         $transaction->load('items.product'); // Memuat relasi dengan 'transaction_items' dan 'products'
 
         return view('transactions.show', compact('transaction'));
+    }
+
+    public function adminIndex()
+    {
+        $transactions = Transaction::with('user')->orderBy('transaction_date', 'desc')->get();
+        return view('product-table.transaction', compact('transactions'));
+    }
+
+    public function updateStatus(Request $request, Transaction $transaction)
+    {
+        $request->validate([
+            'status' => 'required|string'
+        ]);
+
+        $transaction->update(['status' => $request->status]);
+
+        return redirect()->route('admin.transactions')->with('success', 'Status pesanan berhasil diperbarui!');
     }
 }

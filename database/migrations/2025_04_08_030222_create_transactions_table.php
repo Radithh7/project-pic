@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2);
             $table->string('status')->default('pending');
             $table->enum('payment_method', ['cash', 'gopay', 'dana', 'ovo', 'shopeepay'])->default('cash');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

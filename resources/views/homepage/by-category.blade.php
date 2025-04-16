@@ -90,7 +90,7 @@
                                         <i class="bi bi-eye"></i> Lihat Detail
                                     </a>
 
-                                    <form action="#" method="POST">
+                                    <form action="{{ route('cart.add') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <button type="submit" class="btn btn-primary w-100">

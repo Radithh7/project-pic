@@ -45,11 +45,11 @@ Route::group(['middleware' => 'auth:admin'], function() {
     Route::resource('/dashboard', ProductController::class)->names('admin.dashboard');
     Route::post('/dashboard/create', [ProductController::class, 'create'])->name('dashboard.create');
     Route::resource('/category-product', \App\Http\Controllers\CategoryController::class);
-});
 
-// Beli
-Route::get('/checkout', [TransactionController::class, 'create'])->name('transactions.create');
-Route::post('/checkout', [TransactionController::class, 'store'])->name('transactions.store');
+    //Transaksi Admin
+    Route::get('/admin/transactions', [TransactionController::class, 'adminIndex'])->name('admin.transactions');
+    Route::patch('/admin/transactions/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('admin.transactions.update');
+});
 
 // Rute untuk guest (belum login)
 Route::middleware('guest')->group(function () {
@@ -57,11 +57,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'verify'])->name('auth.verify'); // Pastikan menggunakan verify untuk login
 
     // Halaman Register
-    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register')->middleware('guest:admin,user');
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
 });
 
 // Rute untuk logout (gunakan POST, lebih aman)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/checkout', [TransactionController::class, 'create'])->name('transactions.create');

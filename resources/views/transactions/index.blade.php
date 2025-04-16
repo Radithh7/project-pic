@@ -7,22 +7,12 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
         body {
             background: #f8f9fa;
-        }
-
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .text-muted {
-            font-size: 0.9rem;
         }
 
         .no-transactions {
@@ -35,32 +25,40 @@
             font-size: 48px;
             margin-bottom: 16px;
         }
+
+        .table thead {
+            background-color: #f1f3f5;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge-status {
+            font-size: 0.85rem;
+            padding: 0.4em 0.7em;
+            border-radius: 50px;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+        }
+
+        .btn-sm {
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
     <div class="container py-5">
-        <h2 class="fw-bold text-primary mb-4"><i class="bi bi-clock-history me-2"></i>Daftar Transaksi</h2>
+        <h2 class="fw-bold text-primary mb-4"><i class="bi bi-list-check me-2"></i>Riwayat Transaksi</h2>
 
         {{-- Alert --}}
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        {{-- Daftar transaksi --}}
-        @forelse ($transactions as $transaction)
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">🧾 Transaksi #{{ $transaction->id }}</h5>
-                    <p class="text-muted mb-1"><i class="bi bi-calendar3"></i> {{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d M Y H:i') }}</p>
-                    <p class="mb-1"><i class="bi bi-credit-card-2-front"></i> Metode: <strong>{{ ucfirst($transaction->payment_method) }}</strong></p>
-                    <p class="mb-1"><i class="bi bi-info-circle"></i> Status: <span class="badge bg-warning text-dark">{{ ucfirst($transaction->status) }}</span></p>
-                    <p class="mb-3"><i class="bi bi-cash-coin"></i> Total: <strong class="text-success">Rp {{ number_format($transaction->total, 0, ',', '.') }}</strong></p>
-                    <a href="{{ route('transactions.show', $transaction) }}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-eye-fill me-1"></i> Lihat Detail
-                    </a>
-                </div>
-            </div>
-        @empty
+        @if($transactions->isEmpty())
             <div class="no-transactions">
                 <i class="bi bi-receipt fs-1 mb-3"></i>
                 <h5>Belum ada transaksi yang dilakukan.</h5>
@@ -69,7 +67,53 @@
                     <i class="bi bi-cart-plus fs-5 me-1"></i> Belanja Sekarang
                 </a>
             </div>
-        @endforelse
+        @else
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered bg-white shadow-sm">
+                    <thead class="text-center text-secondary">
+                        <tr>
+                            <th>#</th>
+                            <th>Tanggal</th>
+                            <th>Metode</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($transactions as $transaction)
+                            <tr>
+                                <td class="text-center fw-medium">{{ $transaction->id }}</td>
+                                <td>{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('d M Y H:i') }}</td>
+                                <td>
+                                    <i class="bi bi-credit-card me-1"></i> {{ ucfirst($transaction->payment_method) }}
+                                </td>
+                                <td>
+                                    @php
+                                        $status = strtolower($transaction->status);
+                                        $statusClass = match($status) {
+                                            'selesai' => 'bg-success',
+                                            'gagal' => 'bg-danger',
+                                            default => 'bg-warning text-dark'
+                                        };
+                                    @endphp
+                                    <span class="badge badge-status {{ $statusClass }}">{{ ucfirst($transaction->status) }}</span>
+                                </td>
+                                <td class="text-end text-success">Rp {{ number_format($transaction->total, 0, ',', '.') }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('transactions.show', $transaction) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye-fill me-1"></i>Detail
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
