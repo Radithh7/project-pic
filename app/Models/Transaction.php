@@ -11,8 +11,12 @@ class Transaction extends Model
         'transaction_date',
         'buyer_name',
         'total',
-        'status'
+        'status',
+        'payment_method', 
+        'order_id',       
+        'snap_token'      
     ];
+
 
     public function items()
     {

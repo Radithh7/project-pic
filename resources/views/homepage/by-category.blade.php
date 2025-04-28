@@ -14,16 +14,31 @@
             transition: all 0.3s ease-in-out;
         }
         .price-badge {
-            font-size: 1rem;
+            font-size: 0.9rem;
             background-color: #e0f3ff;
             color: #0d6efd;
-            padding: 0.5rem 1rem;
+            padding: 0.3rem 0.6rem;
             border-radius: 999px;
             display: inline-block;
+        }
+        .scroll-wrapper {
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 0.5rem;
+        }
+        .scroll-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
+
+@include('layouts.navbar')
+
 <div class="container-fluid py-4 bg-light">
     <div class="container">
         <h2 class="fw-bold mb-4 text-primary">Kategori Produk</h2>
@@ -35,14 +50,14 @@
                     <ul class="list-unstyled">
                         <li class="mb-2">
                             <a href="{{ route('product-category.index') }}"
-                            class="text-decoration-none d-block {{ request()->routeIs('product-category.index') ? 'fw-bold text-primary' : 'text-dark' }}">
+                               class="text-decoration-none d-block {{ request()->routeIs('product-category.index') ? 'fw-bold text-primary' : 'text-dark' }}">
                                 Semua Produk
                             </a>
                         </li>
                         @foreach ($categories as $cat)
                             <li class="mb-2">
                                 <a href="{{ route('product-category.filter', ['id' => $cat->id]) }}"
-                                class="text-decoration-none d-block {{ request()->is('kategori/'.$cat->id) ? 'fw-bold text-primary' : 'text-dark' }}">
+                                   class="text-decoration-none d-block {{ request()->is('kategori/'.$cat->id) ? 'fw-bold text-primary' : 'text-dark' }}">
                                     {{ $cat->category_name }}
                                 </a>
                             </li>
@@ -62,50 +77,49 @@
                 </div>
 
                 <!-- Product list -->
-                <div class="row g-4">
-                    @php
-                        $productList = isset($products) ? $products : collect();
-                        if (!isset($products)) {
-                            foreach ($categories as $category) {
-                                $productList = $productList->merge($category->products);
+                <div class="bg-white p-3 rounded shadow-sm scroll-wrapper">
+                    <div class="d-flex flex-nowrap gap-3">
+                        @php
+                            $productList = isset($products) ? $products : collect();
+                            if (!isset($products)) {
+                                foreach ($categories as $category) {
+                                    $productList = $productList->merge($category->products);
+                                }
                             }
-                        }
-                    @endphp
+                        @endphp
 
-                    @forelse ($productList as $product)
-                        <div class="col-md-4">
-                            <div class="card shadow-sm border-0 h-100">
+                        @forelse ($productList as $product)
+                            <div class="card shadow-sm border-0" style="min-width: 200px; max-width: 200px; flex: 0 0 auto;">
                                 <div class="position-relative">
-                                    <img src="{{ asset('storage/'.$product->image) }}" class="card-img-top" alt="{{ $product->nameproduct }}" style="height:220px; object-fit:cover;">
+                                    <img src="{{ asset('storage/'.$product->image) }}" class="card-img-top" alt="{{ $product->nameproduct }}" style="height:160px; object-fit:cover;">
                                     <span class="badge bg-primary position-absolute top-0 start-0 m-2">Baru</span>
                                     @if($product->discount)
                                         <span class="badge bg-danger position-absolute top-0 end-0 m-2">-{{ $product->discount }}%</span>
                                     @endif
                                 </div>
-                                <div class="card-body text-center d-flex flex-column">
-                                    <h5 class="card-title">{{ $product->nameproduct }}</h5>
-                                    <p class="price-badge mb-3">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
-
-                                    <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-primary w-100 mb-2">
-                                        <i class="bi bi-eye"></i> Lihat Detail
-                                    </a>
-
-                                    <form action="{{ route('cart.add') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                        <button type="submit" class="btn btn-primary w-100">
-                                            <i class="bi bi-cart-plus"></i> Tambah ke Keranjang
-                                        </button>
-                                    </form>
+                                <div class="card-body text-center p-2 d-flex flex-column">
+                                    <h6 class="card-title mb-1">{{ \Illuminate\Support\Str::limit($product->nameproduct, 25) }}</h6>
+                                    <p class="price-badge mb-2">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                                    <div class="d-flex justify-content-between align-items-center gap-1">
+                                        <a href="{{ route('product.show', $product->id) }}" class="btn btn-sm btn-outline-primary w-100">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <form action="{{ route('cart.add') }}" method="POST" class="w-100">
+                                            @csrf
+                                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                            <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <div class="col">
-                            <p class="text-muted">Tidak ada produk yang ditemukan.</p>
-                        </div>
-                    @endforelse
+                        @empty
+                            <p class="text-muted ms-3">Tidak ada produk yang ditemukan.</p>
+                        @endforelse
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>

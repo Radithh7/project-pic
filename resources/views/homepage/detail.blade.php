@@ -41,6 +41,7 @@
     </style>
 </head>
 <body>
+@include('layouts.navbar')
 
 <div class="container py-5">
     <div class="card shadow-sm border-0 p-4">
@@ -76,25 +77,30 @@
                             @csrf
                             <input type="hidden" name="product_id" value="{{ $product->id }}">
                             <input type="number" name="quantity" min="1" max="{{ $product->stock }}" value="1" class="form-control form-control-sm" style="width: 70px;">
-                            <button type="submit" class="btn btn-outline-primary btn-sm">Keranjang</button>
+                            <button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-cart-plus me-1"></i></button>
                         </form>
 
-                        <form action="{{ route('transactions.store') }}" method="POST" class="d-inline">
+                        {{-- Beli Sekarang --}}
+                        <form id="buy-now-form" method="POST" style="display: none;">
                             @csrf
-                            <input type="hidden" name="transaction_date" value="{{ now()->toDateString() }}">
-                            <input type="hidden" name="buyer_name" value="{{ Auth::user()->name }}">
-                            <input type="hidden" name="products[]" value="{{ $product->id }}">
-                            <input type="hidden" name="quantities[]" value="1">
-                            <input type="hidden" name="payment_method" value="gopay">
-                            <button type="submit" class="btn btn-primary btn-sm">
-                                <i class="bi bi-bag-check me-1"></i> Beli Sekarang
-                            </button>
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="quantity" id="buy-now-quantity" value="1">
                         </form>
+
+                        <button type="button" class="btn btn-success btn-sm" id="buy-now-btn">Bayar dengan Midtrans</button>
+
+                        <form action="{{ route('transactions.cash') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-warning btn-sm">Bayar Tunai</button>
+                        </form>
+
+
 
                         @else
                             <button class="btn btn-secondary btn-sm" disabled>Stok Habis</button>
                         @endif
-
                     </div>
 
                 </div>
@@ -103,6 +109,58 @@
     </div>
 </div>
 
+{{-- Midtrans JS --}}
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('buy-now-btn').addEventListener('click', function () {
+        const productId = {{ $product->id }};
+        const quantity = 1; // bisa ubah kalau mau dynamic
+
+        fetch("{{ route('transactions.getSnapToken') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ product_id: productId, quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.snap_token) {
+                snap.pay(data.snap_token, {
+                    onSuccess: function (result) {
+                        // Kirim data ke server untuk menyimpan transaksi
+                        fetch("{{ route('transactions.payment.success') }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                order_id: result.order_id, // Ambil dari Midtrans response
+                                product_id: productId,
+                                quantity: quantity
+                            })
+                        }).then(() => {
+                            window.location.href = "{{ route('transactions.index') }}";
+                        });
+                    },
+                    onPending: function (result) {
+                        alert("Pembayaran masih pending.");
+                    },
+                    onError: function (result) {
+                        alert("Pembayaran gagal!");
+                    },
+                    onClose: function () {
+                        alert("Kamu menutup pembayaran.");
+                    }
+                });
+            } else {
+                alert('Gagal mendapatkan Snap Token.');
+            }
+        });
+    });
+</script>
 </body>
 </html>

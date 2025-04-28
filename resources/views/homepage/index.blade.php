@@ -46,49 +46,35 @@
             padding: 0.3rem 1rem;
             font-size: 0.9rem;
         }
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* maksimal 2 baris */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.8em; /* agar semua tinggi judul seragam */
+        }
+
+        .scroll-wrapper {
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 0.5rem;
+        }
+        .scroll-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        .scroll-wrapper::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 10px;
+        }
+
+
     </style>
 </head>
 <body class="bg-light-gray">
-<nav class="navbar navbar-expand-lg bg-white py-3">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="#">SPW Online</a>
-
-        <form action="{{ route('product.search') }}" method="GET" class="d-flex mx-auto w-50">
-            <input name="query" class="form-control search-box px-4" type="search" placeholder="Cari produk...">
-            <button class="btn btn-warning btn-rounded ms-2 px-4"><i class="bi bi-search"></i></button>
-        </form>
-
-        <div class="d-flex align-items-center gap-3">
-            @auth
-                <div class="dropdown">
-                    <a class="text-dark dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle fs-5"></i> {{ Auth::user()->name }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{{ route('transactions.index') }}">Transaksi</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form action="{{ route('logout') }}" method="POST">
-                                @csrf
-                                <button class="dropdown-item text-danger" type="submit">Logout</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            @else
-                <a href="{{ route('login') }}" class="text-dark"><i class="bi bi-box-arrow-in-right fs-5"></i></a>
-            @endauth
-            <a href="{{ route('cart.index') }}" class="btn position-relative">
-                <i class="bi bi-cart fs-5"></i>
-                @if($totalCartItems > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ $totalCartItems }}
-                    </span>
-                @endif
-            </a>
-        </div>
-    </div>
-</nav>
+@include('layouts.navbar')
 
 <section class="hero">
     <div class="container">
@@ -132,46 +118,73 @@
             Produk Terbaru
         @endif
     </h2>
-    <div class="row g-4">
-        @forelse ($products as $product)
-            <div class="col-md-4">
-                <div class="card product-card border-0 rounded-4 overflow-hidden h-100">
-                    <img src="{{ asset('storage/'.$product->image ?: 'images/default.jpg') }}" class="img-fluid" style="height: 220px; object-fit: cover;">
-                    <div class="card-body text-center d-flex flex-column">
-                        <h5 class="fw-bold text-truncate" title="{{ $product->nameproduct }}">{{ $product->nameproduct }}</h5>
-                        <span class="price-badge mb-3">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        <a href="{{ route('product.show', ['id' => $product->id]) }}" class="btn btn-outline-primary btn-rounded mt-auto">Lihat Detail</a>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12 text-center">
-                <p>Tidak ada produk ditemukan untuk <strong>{{ $query }}</strong>.</p>
-            </div>
-        @endforelse
-    </div>
 
-    @unless(isset($isSearch) && $isSearch)
-    <div class="py-5" id="produk-terlaris">
-        <h2 class="mb-4 text-center fw-semibold text-dark">Produk Terlaris</h2>
-        <div class="row g-4">
-            @forelse ($bestSellers as $product)
-                <div class="col-md-4">
-                    <div class="card product-card border-0 rounded-4 overflow-hidden h-100">
-                        <img src="{{ asset('storage/'.$product->image ?: 'images/default.jpg') }}" class="img-fluid" style="height: 220px; object-fit: cover;">
-                        <div class="card-body text-center d-flex flex-column">
-                            <h5 class="fw-semibold text-dark mb-2">{{ $product->nameproduct }}</h5>
-                            <span class="price-badge">Rp {{ number_format($product->price,2,',','.') }}</span>
-                            <span class="badge bg-light text-muted rounded-pill small px-3 py-1 mt-2">Terjual {{ $product->transactions_count }}x</span>
-                            <a href="{{ route('product.show', ['id' => $product->id]) }}" class="btn btn-outline-dark btn-rounded mt-3">Lihat Detail</a>
+    <!-- Produk Terbaru -->
+    <div class="bg-white p-3 rounded shadow-sm scroll-wrapper mb-5">
+        <div class="d-flex flex-nowrap gap-3">
+            @forelse ($products as $product)
+                <div class="card shadow-sm border-0" style="min-width: 200px; max-width: 200px; flex: 0 0 auto;">
+                    <div class="position-relative">
+                        <img src="{{ asset('storage/'.$product->image ?: 'images/default.jpg') }}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                        <span class="badge bg-primary position-absolute top-0 start-0 m-2">Baru</span>
+                    </div>
+                    <div class="card-body text-center p-2 d-flex flex-column">
+                        <h6 class="card-title mb-1">{{ \Illuminate\Support\Str::limit($product->nameproduct, 25) }}</h6>
+                        <p class="price-badge mb-2">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                        <div class="d-flex justify-content-between align-items-center gap-1">
+                            <a href="{{ route('product.show', $product->id) }}" class="btn btn-sm btn-outline-primary w-100">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form action="{{ route('cart.add') }}" method="POST" class="w-100">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <button type="submit" class="btn btn-sm btn-primary w-100">
+                                    <i class="bi bi-cart-plus"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="col-12 text-center">
-                    <p class="text-muted">Belum ada produk terlaris saat ini.</p>
-                </div>
+                <p class="text-muted ms-3">Tidak ada produk ditemukan.</p>
             @endforelse
+        </div>
+    </div>
+
+    <!-- Produk Terlaris -->
+    @unless(isset($isSearch) && $isSearch)
+    <div class="py-5" id="produk-terlaris">
+        <h2 class="mb-4 text-center fw-semibold text-dark">Produk Terlaris</h2>
+        <div class="bg-white p-3 rounded shadow-sm scroll-wrapper">
+            <div class="d-flex flex-nowrap gap-3">
+                @forelse ($bestSellers as $product)
+                    <div class="card shadow-sm border-0" style="min-width: 200px; max-width: 200px; flex: 0 0 auto;">
+                        <div class="position-relative">
+                            <img src="{{ asset('storage/'.$product->image ?: 'images/default.jpg') }}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                            <span class="badge bg-success position-absolute top-0 start-0 m-2">Terlaris</span>
+                        </div>
+                        <div class="card-body text-center p-2 d-flex flex-column">
+                            <h6 class="card-title mb-1">{{ \Illuminate\Support\Str::limit($product->nameproduct, 25) }}</h6>
+                            <p class="price-badge mb-1">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                            <span class="badge bg-light text-muted rounded-pill small mb-2">Terjual {{ $product->transactions_count }}x</span>
+                            <div class="d-flex justify-content-between align-items-center gap-1">
+                                <a href="{{ route('product.show', $product->id) }}" class="btn btn-sm btn-outline-dark w-100">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form action="{{ route('cart.add') }}" method="POST" class="w-100">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <button type="submit" class="btn btn-sm btn-dark w-100">
+                                        <i class="bi bi-cart-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-muted ms-3">Belum ada produk terlaris saat ini.</p>
+                @endforelse
+            </div>
         </div>
     </div>
     @endunless

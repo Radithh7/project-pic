@@ -43,6 +43,7 @@
     </style>
 </head>
 <body>
+    @include('layouts.navbar')
     <div class="container py-5">
         <div class="mb-4 text-center">
             <h3 class="fw-bold text-primary"><i class="bi bi-receipt-cutoff me-2"></i>Detail Transaksi</h3>

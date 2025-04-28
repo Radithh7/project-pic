@@ -6,8 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Str;
+use Midtrans\Snap;
+use Midtrans\Config;
+use Midtrans\Notification;
 
 class TransactionController extends Controller
 {
@@ -16,7 +20,7 @@ class TransactionController extends Controller
         $transactions = Transaction::where('user_id', Auth::id())->orderBy('transaction_date', 'desc')->get();
         return view('transactions.index', compact('transactions'));
     }
-    
+
     public function create(Request $request)
     {
         $productId = $request->product_id;
@@ -26,13 +30,11 @@ class TransactionController extends Controller
             return view('transactions.checkout', compact('product'));
         }
 
-        // Tambahkan logic checkout dari keranjang kalau perlu (opsional)
         return redirect()->back()->withErrors(['msg' => 'Produk tidak ditemukan.']);
     }
 
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'transaction_date' => 'required|date',
             'buyer_name'       => 'required|string|max:255',
@@ -46,7 +48,6 @@ class TransactionController extends Controller
         $total = 0;
         $items = [];
 
-        // Cek stok & hitung total
         foreach ($request->products as $index => $productId) {
             $product = Product::findOrFail($productId);
             $quantity = $request->quantities[$index];
@@ -66,8 +67,10 @@ class TransactionController extends Controller
             ];
         }
 
-        // Simpan transaksi utama
+        $orderId = 'TRX-' . time() . '-' . rand(100, 999);
+
         $transaction = Transaction::create([
+            'order_id'         => $orderId,
             'transaction_date' => $request->transaction_date,
             'buyer_name'       => $request->buyer_name,
             'total'            => $total,
@@ -76,30 +79,26 @@ class TransactionController extends Controller
             'payment_method'   => $request->payment_method,
         ]);
 
-        // Konfigurasi Midtrans
-        \Midtrans\Config::$serverKey = config('midtrans.serverKey');
-        \Midtrans\Config::$isProduction = false;
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = false;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
 
-        // Buat parameter transaksi untuk Midtrans
         $params = [
             'transaction_details' => [
-                'order_id' => 'TRX-' . time() . '-' . rand(100, 999),
+                'order_id'     => $orderId,
                 'gross_amount' => $total,
             ],
             'customer_details' => [
                 'first_name' => Auth::user()->name,
-                'email' => Auth::user()->email,
+                'email'      => Auth::user()->email,
             ],
         ];
 
-        // Dapatkan Snap Token
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $snapToken = Snap::getSnapToken($params);
         $transaction->snap_token = $snapToken;
         $transaction->save();
 
-        // Simpan item transaksi & update stok
         foreach ($items as $item) {
             TransactionItem::create([
                 'transaction_id' => $transaction->id,
@@ -112,7 +111,6 @@ class TransactionController extends Controller
             Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
         }
 
-        // Tampilkan halaman pembayaran Midtrans
         return view('transactions.payment', [
             'transaction' => $transaction,
             'snapToken'   => $snapToken
@@ -121,9 +119,7 @@ class TransactionController extends Controller
 
     public function show(Transaction $transaction)
     {
-        // Ambil data transaksi bersama dengan item transaksi terkait
-        $transaction->load('items.product'); // Memuat relasi dengan 'transaction_items' dan 'products'
-
+        $transaction->load('items.product');
         return view('transactions.show', compact('transaction'));
     }
 
@@ -140,7 +136,138 @@ class TransactionController extends Controller
         ]);
 
         $transaction->update(['status' => $request->status]);
-
         return redirect()->route('admin.transactions')->with('success', 'Status pesanan berhasil diperbarui!');
+    }
+
+    public function handleCallback(Request $request)
+    {
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = config('midtrans.is_sanitized');
+        Config::$is3ds = config('midtrans.is_3ds');
+
+        $notif = new Notification();
+        $status = $notif->transaction_status;
+        $orderId = $notif->order_id;
+
+        $transaction = Transaction::where('order_id', $orderId)->first();
+
+        if (!$transaction && in_array($status, ['capture', 'settlement'])) {
+            $userId = $notif->custom_fields->user_id ?? null;
+            $productId = $notif->custom_fields->product_id ?? null;
+            $quantity = $notif->custom_fields->quantity ?? 1;
+
+            $product = Product::find($productId);
+            $subtotal = $product->price * $quantity;
+
+            $transaction = Transaction::create([
+                'order_id'         => $orderId,
+                'transaction_date' => now(),
+                'buyer_name'       => $userId ? User::find($userId)->name : 'Unknown',
+                'total'            => $subtotal,
+                'status'           => 'paid',
+                'user_id'          => $userId,
+                'payment_method'   => 'gopay',
+            ]);
+
+            TransactionItem::create([
+                'transaction_id' => $transaction->id,
+                'product_id'     => $productId,
+                'quantity'       => $quantity,
+                'price'          => $product->price,
+                'subtotal'       => $subtotal,
+            ]);
+
+            Product::where('id', $productId)->decrement('stock', $quantity);
+        }
+
+        return response()->json(['status' => 'callback received']);
+    }
+
+    public function getSnapToken(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity'   => 'required|integer|min:1'
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+        $orderId = 'TRX-' . time() . '-' . rand(1000, 9999);
+
+        session(['pending_order_id' => $orderId]);
+
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = false;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        $params = [
+            'transaction_details' => [
+                'order_id'     => $orderId,
+                'gross_amount' => $product->price * $request->quantity,
+            ],
+            'customer_details' => [
+                'first_name' => Auth::user()->name,
+                'email'      => Auth::user()->email,
+            ],
+            'item_details' => [
+                [
+                    'id'       => $product->id,
+                    'price'    => $product->price,
+                    'quantity' => $request->quantity,
+                    'name'     => $product->nameproduct
+                ]
+            ],
+            'callbacks' => [
+                'finish' => route('transactions.index')
+            ],
+            'custom_fields' => [
+                'user_id'    => Auth::id(),
+                'product_id' => $product->id,
+                'quantity'   => $request->quantity
+            ]
+        ];
+
+        $snapToken = Snap::getSnapToken($params);
+        return response()->json(['snap_token' => $snapToken]);
+    }
+    public function buyWithCash(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1'
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+        $quantity = $request->quantity;
+
+        if ($product->stock < $quantity) {
+            return back()->withErrors(['msg' => 'Stok tidak mencukupi.']);
+        }
+
+        $subtotal = $product->price * $quantity;
+        $orderId = 'CASH-' . time() . '-' . rand(100, 999);
+
+        $transaction = Transaction::create([
+            'order_id' => $orderId,
+            'transaction_date' => now(),
+            'buyer_name' => Auth::user()->name,
+            'total' => $subtotal,
+            'status' => 'paid', // langsung dianggap berhasil
+            'user_id' => Auth::id(),
+            'payment_method' => 'cash',
+        ]);
+
+        TransactionItem::create([
+            'transaction_id' => $transaction->id,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'price' => $product->price,
+            'subtotal' => $subtotal,
+        ]);
+
+        $product->decrement('stock', $quantity);
+
+        return redirect()->route('transactions.index')->with('success', 'Transaksi cash berhasil!');
     }
 }
